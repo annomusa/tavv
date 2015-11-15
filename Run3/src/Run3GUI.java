@@ -26,6 +26,40 @@ public class Run3GUI extends javax.swing.JFrame {
      */
     public Run3GUI() {
         initComponents();
+        
+        Mat m = Highgui.imread("D:\\anno\\TA\\imagemalam2\\cawang1.jpg",Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+        Mat ori = Highgui.imread("D:\\anno\\TA\\imagemalam2\\cawang1.jpg");
+        // grayscale
+        jLabel1.setIcon(new ImageIcon(toBufferedImage(m))); 
+        
+        Mat m2 = new Mat();
+        //Imgproc.adaptiveThreshold(m, m2, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 4);
+        Imgproc.threshold(m, m2, 0, 255, Imgproc.THRESH_OTSU);
+        
+        jLabel2.setIcon(new ImageIcon(toBufferedImage(ori)));
+        
+        // opening
+        Mat m3 = new Mat();
+        Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+        Imgproc.erode(m2, m3, erodeElement);
+        Imgproc.dilate(m3, m3, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(6,6)));
+        jLabel3.setIcon(new ImageIcon(toBufferedImage(m3)));
+        
+        // top hat
+        final Mat kernel = Mat.ones(9, 9, CvType.CV_8UC1);
+        final Mat m4 = new Mat();
+        final Mat m5 = new Mat();
+        Imgproc.morphologyEx(m, m4, Imgproc.MORPH_TOPHAT, kernel);
+        Imgproc.morphologyEx(m4, m5, Imgproc.MORPH_TOPHAT, kernel);
+        jLabel3.setIcon(new ImageIcon(toBufferedImage(m4)));
+        jLabel4.setIcon(new ImageIcon(toBufferedImage(m5)));
+        
+        // otsu + open
+        final Mat kernel2 = Mat.ones(1, 1, CvType.CV_8UC1);
+        Imgproc.threshold(m4, m4, 0, 255, Imgproc.THRESH_OTSU);
+        Imgproc.morphologyEx(m4, m4, Imgproc.MORPH_OPEN, kernel2);
+        //jLabel4.setIcon(new ImageIcon(toBufferedImage(m4)));
+        
     }
 
     /**
@@ -91,38 +125,7 @@ public class Run3GUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        Mat m = Highgui.imread("D:\\anno\\TA\\imagemalam2\\cawang1.jpg",Highgui.CV_LOAD_IMAGE_GRAYSCALE);
-        Mat ori = Highgui.imread("D:\\anno\\TA\\imagemalam2\\cawang1.jpg");
-        // grayscale
-        jLabel1.setIcon(new ImageIcon(toBufferedImage(m))); 
         
-        Mat m2 = new Mat();
-        //Imgproc.adaptiveThreshold(m, m2, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 4);
-        Imgproc.threshold(m, m2, 0, 255, Imgproc.THRESH_OTSU);
-        
-        jLabel2.setIcon(new ImageIcon(toBufferedImage(ori)));
-        
-        // opening
-        Mat m3 = new Mat();
-        Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
-        Imgproc.erode(m2, m3, erodeElement);
-        Imgproc.dilate(m3, m3, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(6,6)));
-        jLabel3.setIcon(new ImageIcon(toBufferedImage(m3)));
-        
-        // top hat
-        final Mat kernel = Mat.ones(9, 9, CvType.CV_8UC1);
-        final Mat m4 = new Mat();
-        final Mat m5 = new Mat();
-        Imgproc.morphologyEx(m, m4, Imgproc.MORPH_TOPHAT, kernel);
-        Imgproc.morphologyEx(m4, m5, Imgproc.MORPH_TOPHAT, kernel);
-        jLabel3.setIcon(new ImageIcon(toBufferedImage(m4)));
-        jLabel4.setIcon(new ImageIcon(toBufferedImage(m5)));
-        
-        // otsu + open
-        final Mat kernel2 = Mat.ones(1, 1, CvType.CV_8UC1);
-        Imgproc.threshold(m4, m4, 0, 255, Imgproc.THRESH_OTSU);
-        Imgproc.morphologyEx(m4, m4, Imgproc.MORPH_OPEN, kernel2);
-        //jLabel4.setIcon(new ImageIcon(toBufferedImage(m4)));
         
     }//GEN-LAST:event_jButton1ActionPerformed
     
