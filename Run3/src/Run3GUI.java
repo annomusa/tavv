@@ -30,15 +30,15 @@ public class Run3GUI extends javax.swing.JFrame {
         Mat m = Highgui.imread("D:\\anno\\TA\\imagemalam2\\cawang1.jpg",Highgui.CV_LOAD_IMAGE_GRAYSCALE);
         Mat ori = Highgui.imread("D:\\anno\\TA\\imagemalam2\\cawang1.jpg");
         // grayscale
-        jLabel1.setIcon(new ImageIcon(toBufferedImage(m))); 
+        jLabel1.setIcon(new ImageIcon(toBufferedImage(ori))); 
         
         Mat m2 = new Mat();
         //Imgproc.adaptiveThreshold(m, m2, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 4);
         Imgproc.threshold(m, m2, 0, 255, Imgproc.THRESH_OTSU);
         
-        jLabel2.setIcon(new ImageIcon(toBufferedImage(ori)));
-        
-        // opening
+        jLabel2.setIcon(new ImageIcon(toBufferedImage(m)));
+         
+       // opening
         Mat m3 = new Mat();
         Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
         Imgproc.erode(m2, m3, erodeElement);
@@ -51,14 +51,20 @@ public class Run3GUI extends javax.swing.JFrame {
         final Mat m5 = new Mat();
         Imgproc.morphologyEx(m, m4, Imgproc.MORPH_TOPHAT, kernel);
         Imgproc.morphologyEx(m4, m5, Imgproc.MORPH_TOPHAT, kernel);
+        Imgproc.morphologyEx(m5, m5, Imgproc.MORPH_TOPHAT, kernel);
+        Imgproc.morphologyEx(m5, m5, Imgproc.MORPH_TOPHAT, kernel);
+        Imgproc.morphologyEx(m5, m5, Imgproc.MORPH_TOPHAT, kernel);
+        Imgproc.morphologyEx(m5, m5, Imgproc.MORPH_TOPHAT, kernel);
+        Imgproc.morphologyEx(m5, m5, Imgproc.MORPH_TOPHAT, kernel);
+        Imgproc.morphologyEx(m5, m5, Imgproc.MORPH_TOPHAT, kernel);
         jLabel3.setIcon(new ImageIcon(toBufferedImage(m4)));
         jLabel4.setIcon(new ImageIcon(toBufferedImage(m5)));
         
         // otsu + open
-        final Mat kernel2 = Mat.ones(1, 1, CvType.CV_8UC1);
+        Mat kernel2 = Mat.ones(3, 3, CvType.CV_8UC1);
         Imgproc.threshold(m4, m4, 0, 255, Imgproc.THRESH_OTSU);
         Imgproc.morphologyEx(m4, m4, Imgproc.MORPH_OPEN, kernel2);
-        //jLabel4.setIcon(new ImageIcon(toBufferedImage(m4)));
+        jLabel4.setIcon(new ImageIcon(toBufferedImage(m4)));
         
     }
 
@@ -71,20 +77,12 @@ public class Run3GUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jButton1.setText("jButton1");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -93,41 +91,33 @@ public class Run3GUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(71, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(35, 35, 35))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
-        
-    }//GEN-LAST:event_jButton1ActionPerformed
     
     /**
      * @param args the command line arguments
@@ -180,7 +170,6 @@ public class Run3GUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
