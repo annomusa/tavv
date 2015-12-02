@@ -1,34 +1,35 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
 import javax.swing.ImageIcon;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
-import static org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_MEAN_C;
+import org.opencv.imgcodecs.Imgcodecs;
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 /**
  *
- * @author Asus
+ * @author Raffi
  */
-public class Run3GUI extends javax.swing.JFrame {
+public final class tavv extends javax.swing.JFrame {
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
     /**
-     * Creates new form Run3GUI
+     * Creates new form tavv
      */
-    public Run3GUI() {
+    public tavv() {
         initComponents();
         
-        Mat m = Highgui.imread("D:\\anno\\TA\\imagemalam2\\cawang1.jpg",Highgui.CV_LOAD_IMAGE_GRAYSCALE);
-        Mat ori = Highgui.imread("D:\\anno\\TA\\imagemalam2\\cawang1.jpg");
+        Mat m = Imgcodecs.imread("D:\\anno\\TA\\imagemalam2\\SSPadalarang2.jpg",Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+        Mat ori = Imgcodecs.imread("D:\\anno\\TA\\imagemalam2\\SSPadalarang2.jpg");
         // grayscale
         jLabel1.setIcon(new ImageIcon(toBufferedImage(ori))); 
         
@@ -46,9 +47,9 @@ public class Run3GUI extends javax.swing.JFrame {
         jLabel3.setIcon(new ImageIcon(toBufferedImage(m3)));
         
         // top hat
-        final Mat kernel = Mat.ones(9, 9, CvType.CV_8UC1);
-        final Mat m4 = new Mat();
-        final Mat m5 = new Mat();
+        Mat kernel = Mat.ones(7, 7, CvType.CV_8UC1);
+        Mat m4 = new Mat();
+        Mat m5 = new Mat();
         Imgproc.morphologyEx(m, m4, Imgproc.MORPH_TOPHAT, kernel);
         jLabel3.setIcon(new ImageIcon(toBufferedImage(m4)));
         //jLabel4.setIcon(new ImageIcon(toBufferedImage(m5)));
@@ -59,7 +60,30 @@ public class Run3GUI extends javax.swing.JFrame {
         Imgproc.morphologyEx(m4, m4, Imgproc.MORPH_OPEN, kernel2);
         Imgproc.morphologyEx(m4, m4, Imgproc.MORPH_CLOSE, kernel2);
         jLabel4.setIcon(new ImageIcon(toBufferedImage(m4)));
+        m5 = m4;
+        int a = 6;
+//        Imgproc.connectedComponents(m4, m5);
+//        Imgproc.connectedComponents(m4, m4);
         
+        m5.convertTo(m5, CvType.CV_8U);
+        
+        Mat stats = m5;
+        Mat centroids = m5; 
+//        
+        a = Imgproc.connectedComponentsWithStats(m5, m5, stats, centroids);
+        System.out.println(a);
+        System.out.println(centroids.dump());
+        
+        System.out.println(centroids.type());
+        //centroids.convertTo(centroids, CvType.CV_32S);
+        int size = (int)centroids.total() * centroids.channels();
+        byte[] data = new byte[size];
+        int a1;
+//        jLabel5.setIcon(new ImageIcon(toBufferedImage(m5)));
+        a1 = centroids.get(0, 0, data);
+        System.out.println(ori.channels());
+        System.out.println(data[0]);
+        jLabel5.setIcon(new ImageIcon(toBufferedImage(centroids)));
     }
 
     /**
@@ -75,6 +99,8 @@ public class Run3GUI extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -85,34 +111,37 @@ public class Run3GUI extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(71, Short.MAX_VALUE))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 361, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 360, Short.MAX_VALUE))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    
+
     /**
      * @param args the command line arguments
      */
@@ -130,20 +159,21 @@ public class Run3GUI extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Run3GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(tavv.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Run3GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(tavv.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Run3GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(tavv.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Run3GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(tavv.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                new Run3GUI().setVisible(true);
+                new tavv().setVisible(true);
             }
         });
     }
@@ -168,5 +198,7 @@ public class Run3GUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     // End of variables declaration//GEN-END:variables
 }
