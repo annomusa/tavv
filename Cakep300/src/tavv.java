@@ -2,10 +2,13 @@
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.util.Arrays;
 import javax.swing.ImageIcon;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -28,62 +31,110 @@ public final class tavv extends javax.swing.JFrame {
     public tavv() {
         initComponents();
         
-        Mat m = Imgcodecs.imread("D:\\anno\\TA\\imagemalam2\\SSPadalarang2.jpg",Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
-        Mat ori = Imgcodecs.imread("D:\\anno\\TA\\imagemalam2\\SSPadalarang2.jpg");
+        Mat greyscale = Imgcodecs.imread("C:\\Users\\raffi\\Documents\\TA\\tavv\\imagemalam2\\SSPadalarang2.jpg",Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
+        Mat ori = Imgcodecs.imread("C:\\Users\\raffi\\Documents\\TA\\tavv\\imagemalam2\\SSPadalarang2.jpg");
+        
         // grayscale
         jLabel1.setIcon(new ImageIcon(toBufferedImage(ori))); 
-        
-        Mat m2 = new Mat();
-        //Imgproc.adaptiveThreshold(m, m2, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 4);
-        Imgproc.threshold(m, m2, 0, 255, Imgproc.THRESH_OTSU);
-        
-        jLabel2.setIcon(new ImageIcon(toBufferedImage(m)));
-         
-       // opening
-        Mat m3 = new Mat();
-        Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
-        Imgproc.erode(m2, m3, erodeElement);
-        Imgproc.dilate(m3, m3, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(6,6)));
-        jLabel3.setIcon(new ImageIcon(toBufferedImage(m3)));
+        jLabel2.setIcon(new ImageIcon(toBufferedImage(greyscale)));
         
         // top hat
-        Mat kernel = Mat.ones(7, 7, CvType.CV_8UC1);
-        Mat m4 = new Mat();
-        Mat m5 = new Mat();
-        Imgproc.morphologyEx(m, m4, Imgproc.MORPH_TOPHAT, kernel);
-        jLabel3.setIcon(new ImageIcon(toBufferedImage(m4)));
-        //jLabel4.setIcon(new ImageIcon(toBufferedImage(m5)));
+        Mat kernel = Mat.ones(15, 15, CvType.CV_8UC1);
+        Mat tophat = new Mat();
+        Imgproc.morphologyEx(greyscale, tophat, Imgproc.MORPH_TOPHAT, kernel);
+        jLabel3.setIcon(new ImageIcon(toBufferedImage(tophat)));
         
         // otsu + open
-        Mat kernel2 = Mat.ones(3, 3, CvType.CV_8UC1);
-        Imgproc.threshold(m4, m4, 0, 255, Imgproc.THRESH_OTSU);
-        Imgproc.morphologyEx(m4, m4, Imgproc.MORPH_OPEN, kernel2);
-        Imgproc.morphologyEx(m4, m4, Imgproc.MORPH_CLOSE, kernel2);
-        jLabel4.setIcon(new ImageIcon(toBufferedImage(m4)));
-        m5 = m4;
-        int a = 6;
-//        Imgproc.connectedComponents(m4, m5);
-//        Imgproc.connectedComponents(m4, m4);
+        Mat kernel2 = Mat.ones(5, 5, CvType.CV_8UC1);
+        Mat otsu = new Mat();
+        Imgproc.threshold(tophat, otsu, 0, 255, Imgproc.THRESH_OTSU);
+        Imgproc.morphologyEx(otsu, otsu, Imgproc.MORPH_OPEN, kernel2);
+        Imgproc.morphologyEx(otsu, otsu, Imgproc.MORPH_CLOSE, kernel2);
+        jLabel4.setIcon(new ImageIcon(toBufferedImage(otsu)));
         
-        m5.convertTo(m5, CvType.CV_8U);
+        // connected component
+        Mat labelling = otsu;
+        Mat stats = new Mat();
+        Mat centroids = new Mat(); 
+        Imgproc.connectedComponentsWithStats(otsu, labelling, stats, centroids);
+//        System.out.println(centroids.dump());
+//        System.out.println(stats.dump());
         
-        Mat stats = m5;
-        Mat centroids = m5; 
-//        
-        a = Imgproc.connectedComponentsWithStats(m5, m5, stats, centroids);
-        System.out.println(a);
-        System.out.println(centroids.dump());
-        
-        System.out.println(centroids.type());
-        //centroids.convertTo(centroids, CvType.CV_32S);
-        int size = (int)centroids.total() * centroids.channels();
-        byte[] data = new byte[size];
+               
+        // get data centroid
         int a1;
-//        jLabel5.setIcon(new ImageIcon(toBufferedImage(m5)));
-        a1 = centroids.get(0, 0, data);
-        System.out.println(ori.channels());
-        System.out.println(data[0]);
-        jLabel5.setIcon(new ImageIcon(toBufferedImage(centroids)));
+        centroids.convertTo(centroids, CvType.CV_32S);
+        int size_centroids = (int)centroids.total() * centroids.channels();
+        int[] data_centroids = new int[size_centroids];
+        int[][] data_centroids2 = new int[size_centroids][2];
+        int jlh_obj = 0;
+        a1 = centroids.get(0, 0, data_centroids);
+        System.out.println(a1);
+        for(int i=0; i<data_centroids.length; i++){
+            System.out.print(data_centroids[i] + " ");
+            if(i%2==1) {
+                data_centroids2[jlh_obj][1] = data_centroids[i]; 
+                System.out.println();
+                jlh_obj++;
+            } else data_centroids2[jlh_obj][0] = data_centroids[i]; 
+        }
+        
+        // get data stats
+        // left_most; top_most; widht; height; area;
+        int size_stats = (int)stats.total() * stats.channels();
+        int[] data_stats = new int[size_stats];
+        int[][] data_stats2 = new int[size_stats/5][size_stats];
+        a1 = stats.get(0, 0, data_stats);
+        System.out.println(a1);
+        int y=0;
+        for(int i=0; i<data_stats.length; i++){
+            switch (i%5) {
+                case 0:
+                    System.out.print("x : " + data_stats[i] +" ");
+                    data_stats2[y][0] = data_stats[i];
+                    break;
+                case 1:
+                    System.out.print("y : " + data_stats[i] +" ");
+                    data_stats2[y][1] = data_stats[i];
+                    break;
+                case 2:
+                    System.out.print("w : " + data_stats[i] +" ");
+                    data_stats2[y][2] = data_stats[i];
+                    break;
+                case 3:
+                    System.out.print("h : " + data_stats[i] +" ");
+                    data_stats2[y][3] = data_stats[i];
+                    break;
+                case 4:
+                    System.out.println("a : " + data_stats[i] );
+                    data_stats2[y][4] = data_stats[i];
+                    y++;
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        // gambar kotak
+        for(int i=1;i<y;i++)
+        Imgproc.rectangle(ori, new Point(data_stats2[i][0],data_stats2[i][1]), 
+                new Point(data_stats2[i][0]+data_stats2[i][2],data_stats2[i][1]+data_stats2[i][3]),
+                new Scalar(0, 255, 255), 2);
+        jLabel5.setIcon(new ImageIcon(toBufferedImage(ori)));
+        
+        for(int i=1;i<jlh_obj;i++){
+            for(int j=1;j<jlh_obj;j++){
+                if(i==j) continue;
+                if(Math.abs(data_centroids2[i][0] - data_centroids2[j][0]) < 50){
+                    if(Math.abs(data_centroids2[j][1] - data_centroids2[i][1]) < 10){
+                        Imgproc.rectangle(ori, new Point(data_stats2[i][0],data_stats2[i][1]), 
+                            new Point(data_stats2[j][0]+data_stats2[j][2],data_stats2[j][1]+data_stats2[j][3]),
+                            new Scalar(255, 0, 255), 2);
+                    }
+                }
+            }
+        }
+        jLabel6.setIcon(new ImageIcon(toBufferedImage(ori)));
     }
 
     /**
