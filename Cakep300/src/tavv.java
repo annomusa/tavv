@@ -2,16 +2,21 @@
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgcodecs.Imgcodecs;
+import static org.opencv.imgproc.Imgproc.equalizeHist;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -27,8 +32,9 @@ public final class tavv extends javax.swing.JFrame {
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
     /**
      * Creates new form tavv
+     * @throws java.io.IOException
      */
-    public tavv() {
+    public tavv() throws IOException {
         initComponents();
         
         Mat greyscale = Imgcodecs.imread("C:\\Users\\raffi\\Documents\\TA\\tavv\\imagemalam2\\SSPadalarang2.jpg",Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE);
@@ -39,17 +45,18 @@ public final class tavv extends javax.swing.JFrame {
         jLabel2.setIcon(new ImageIcon(toBufferedImage(greyscale)));
         
         // top hat
-        Mat kernel = Mat.ones(15, 15, CvType.CV_8UC1);
+        Mat kernel = Mat.ones(13, 13, CvType.CV_8UC1);
         Mat tophat = new Mat();
         Imgproc.morphologyEx(greyscale, tophat, Imgproc.MORPH_TOPHAT, kernel);
         jLabel3.setIcon(new ImageIcon(toBufferedImage(tophat)));
         
         // otsu + open
         Mat kernel2 = Mat.ones(5, 5, CvType.CV_8UC1);
+        Mat kernel3 = Mat.ones(5, 5, CvType.CV_8UC1);
         Mat otsu = new Mat();
         Imgproc.threshold(tophat, otsu, 0, 255, Imgproc.THRESH_OTSU);
         Imgproc.morphologyEx(otsu, otsu, Imgproc.MORPH_OPEN, kernel2);
-        Imgproc.morphologyEx(otsu, otsu, Imgproc.MORPH_CLOSE, kernel2);
+        Imgproc.morphologyEx(otsu, otsu, Imgproc.MORPH_CLOSE, kernel3);
         jLabel4.setIcon(new ImageIcon(toBufferedImage(otsu)));
         
         // connected component
@@ -116,25 +123,44 @@ public final class tavv extends javax.swing.JFrame {
         }
         
         // gambar kotak
-        for(int i=1;i<y;i++)
-        Imgproc.rectangle(ori, new Point(data_stats2[i][0],data_stats2[i][1]), 
-                new Point(data_stats2[i][0]+data_stats2[i][2],data_stats2[i][1]+data_stats2[i][3]),
-                new Scalar(0, 255, 255), 2);
-        jLabel5.setIcon(new ImageIcon(toBufferedImage(ori)));
+//        for(int i=1;i<y;i++)
+//        Imgproc.rectangle(ori, new Point(data_stats2[i][0],data_stats2[i][1]), new Point(data_stats2[i][0]+data_stats2[i][2],data_stats2[i][1]+data_stats2[i][3]), new Scalar(0, 255, 255), 2);
+//        jLabel5.setIcon(new ImageIcon(toBufferedImage(ori)));
+
         
+        Rect[] arrRectCrop = new Rect[100];
+        
+        int jlh_kandidat = 0;
+        int tes1 = 0, tes2 = 0;
         for(int i=1;i<jlh_obj;i++){
             for(int j=1;j<jlh_obj;j++){
-                if(i==j) continue;
+                if(i==j || data_centroids2[i][0] > data_centroids2[j][0]) continue;
                 if(Math.abs(data_centroids2[i][0] - data_centroids2[j][0]) < 50){
                     if(Math.abs(data_centroids2[j][1] - data_centroids2[i][1]) < 10){
-                        Imgproc.rectangle(ori, new Point(data_stats2[i][0],data_stats2[i][1]), 
-                            new Point(data_stats2[j][0]+data_stats2[j][2],data_stats2[j][1]+data_stats2[j][3]),
-                            new Scalar(255, 0, 255), 2);
+                        Imgproc.rectangle(ori, new Point(data_stats2[i][0],data_stats2[i][1]), new Point(data_stats2[j][0]+data_stats2[j][2], data_stats2[j][1]+data_stats2[j][3]), new Scalar(255, 0, 255), 2);
+                        Rect tempCrop = new Rect(data_stats2[i][0], data_stats2[i][1], (data_stats2[j][0]+data_stats2[j][2]) -  data_stats2[i][0], (data_stats2[j][1]+data_stats2[j][3]) - data_stats2[i][1]);
+                        arrRectCrop[jlh_kandidat] = tempCrop;
+                        jlh_kandidat++;
+                        tes1 = i; tes2 = j;
                     }
                 }
             }
         }
-        jLabel6.setIcon(new ImageIcon(toBufferedImage(ori)));
+        jLabel5.setIcon(new ImageIcon(toBufferedImage(ori)));
+        System.out.println(jlh_kandidat);
+        
+        //Rect rectCrop = new Rect(data_stats2[tes1][0], data_stats2[tes1][1], (data_stats2[tes2][0]+data_stats2[tes2][2]) -  data_stats2[tes1][0], (data_stats2[tes2][1]+data_stats2[tes2][3]) - data_stats2[tes1][1]);
+        
+//        Mat imCrop = new Mat(ori, arrRectCrop[0]);
+//        jLabel6.setIcon(new ImageIcon(toBufferedImage(imCrop)));
+        
+//        BufferedImage output =  (BufferedImage) toBufferedImage(imCrop);
+//        File outputFile = new File("image.jpg");
+//        ImageIO.write(output, "jpg", outputFile);
+
+//        Mat histo = new Mat();
+//        equalizeHist(greyscale, histo);
+//        jLabel6.setIcon(new ImageIcon(toBufferedImage(histo)));
     }
 
     /**
@@ -224,7 +250,11 @@ public final class tavv extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new tavv().setVisible(true);
+                try {
+                    new tavv().setVisible(true);
+                } catch (IOException ex) {
+                    Logger.getLogger(tavv.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
