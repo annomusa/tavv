@@ -1,0 +1,1 @@
+haartraining.exe -data cascades -vec vector/newvector.vec -bg negative/bg.txt -npos 200 -nneg 74 -nstages 5 -mem 1024 -mode ALL -w 20 -h 20 –nonsym 

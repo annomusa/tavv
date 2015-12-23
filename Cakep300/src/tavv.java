@@ -12,11 +12,14 @@ import javax.swing.ImageIcon;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.objdetect.CascadeClassifier;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -129,6 +132,7 @@ public final class tavv extends javax.swing.JFrame {
 //        jLabel5.setIcon(new ImageIcon(toBufferedImage(ori)));
 
         Mat gambarIni = ori.clone();
+        Mat gambarIni2 = ori.clone();
         Rect[] arrRectCrop = new Rect[10000];
         int jlhKandidat = 0;
         int batasBawah, batasKanan, widthRoi, heightRoi, xRoi, yRoi;
@@ -186,13 +190,7 @@ public final class tavv extends javax.swing.JFrame {
                             new Point(batasKanan, batasBawah), 
                             new Scalar(255, 0, 255),
                             1);
-
-
-                    // rect(x, y, widht, height)
-//                    Rect tempCrop = new Rect(dataStats2[i][0],
-//                            dataStats2[i][1],
-//                            (dataStats2[j][0]+dataStats2[j][2]) - dataStats2[i][0],
-//                            (dataStats2[j][1]+dataStats2[j][3]) - dataStats2[i][1]);
+                    
                     Rect tempCrop = new Rect(xRoi, yRoi, widthRoi, heightRoi);
                     
                     arrRectCrop[jlhKandidat] = tempCrop;
@@ -205,18 +203,69 @@ public final class tavv extends javax.swing.JFrame {
         System.out.println(jlhKandidat);
         
                 
-        Mat imCrop = new Mat(ori, arrRectCrop[3]);
-        jLabel6.setIcon(new ImageIcon(toBufferedImage(imCrop)));
+        Mat imCrop = new Mat(ori, arrRectCrop[10]);
+        jLabel4.setIcon(new ImageIcon(toBufferedImage(imCrop)));
       
-        BufferedImage output =  (BufferedImage) toBufferedImage(imCrop);
-        File outputFile = new File("image.jpg");
-        ImageIO.write(output, "jpg", outputFile);
+        CascadeClassifier carDetector = new CascadeClassifier("C:\\Users\\raffi\\Documents\\TA\\tavv\\Cakep300\\mynewcardetector.xml");
+        MatOfRect carDetections = new MatOfRect();
+        carDetector.detectMultiScale(imCrop, carDetections);
+        if(carDetections.toArray().length != 0){
+            Imgproc.rectangle(gambarIni2, 
+                    new Point(arrRectCrop[0].x, arrRectCrop[0].y), 
+                    new Point(arrRectCrop[0].x + arrRectCrop[0].width,
+                            arrRectCrop[0].y + arrRectCrop[0].height), 
+                    new Scalar(255, 0, 255),
+                    1
+                    );
+        }
+        jLabel6.setIcon(new ImageIcon(toBufferedImage(gambarIni2)));
+//        for(int i=0;i<jlhKandidat;i++){
+//            MatOfRect carDetections2 = new MatOfRect();
+//            Mat imCrop2 = new Mat(ori, arrRectCrop[i]);
+//            carDetector.detectMultiScale(imCrop2, carDetections2);
+//        
+//            if(carDetections2.toArray().length != 0){
+//                Imgproc.rectangle(gambarIni2,
+//                        new Point(arrRectCrop[i].x, arrRectCrop[i].y),
+//                        new Point(arrRectCrop[i].x + arrRectCrop[i].width, 
+//                                arrRectCrop[i].y + arrRectCrop[i].height),
+//                        new Scalar(255, 0, 255),
+//                        1);
+//            }
+//        }
+//        jLabel6.setIcon(new ImageIcon(toBufferedImage(gambarIni2)));
+        // "C:\Users\raffi\Documents\TA\tavv\Cakep300\mycardetector.xml"
 
+        
+        
+        // cascade classifier tanpa ROI
+        
+        Mat face = Imgcodecs.imread("C:\\Users\\raffi\\Documents\\TA\\tavv\\Cakep300\\sample\\P0017.bmp");
+        MatOfRect faceDetections = new MatOfRect();
+        
+        // detectMultiScale : src, rect, 
+        carDetector.detectMultiScale(ori, 
+                faceDetections, 
+                1.1, 
+                1, 
+                0,
+                new Size(3,3), 
+                new Size(100,100) );
+
+        System.out.println(String.format("Detected %s faces",
+                faceDetections.toArray().length));
+
+        // Draw a bounding box around each face.
+        for (Rect rect : faceDetections.toArray()) {
+            Imgproc.rectangle(ori, new Point(rect.x, rect.y), new Point(rect.x
+                    + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+        }
+        jLabel3.setIcon(new ImageIcon(toBufferedImage(ori)));
     }
 
     /**
      * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
+     * WARNING: Do NOT modify this code. The content of      this method is always
      * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
